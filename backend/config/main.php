@@ -1,4 +1,7 @@
 <?php
+
+use yii\web\Response;
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -13,13 +16,17 @@ return [
     'bootstrap' => ['log'],
     'modules' => [],
     'components' => [
-        'request' => [
-            'csrfParam' => '_csrf-backend',
-        ],
+		'request' => [
+			'parsers' => [
+				'application/json' => 'yii\web\JsonParser',
+			]
+		],
+		'response' => [
+			'format' => Response::FORMAT_JSON
+		],
         'user' => [
-            'identityClass' => 'common\models\User',
-            'enableAutoLogin' => true,
-            'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
+            'identityClass' => 'backend\models\User',
+			'enableSession' => false
         ],
         'session' => [
             // this is the name of the session cookie used for login on the backend
@@ -37,14 +44,20 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        /*
-        'urlManager' => [
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'rules' => [
-            ],
-        ],
-        */
+		'urlManager' => [
+			'enablePrettyUrl' => true,
+			'enableStrictParsing' => true,
+			'showScriptName' => false,
+			'rules' => [
+				[
+					'class' => 'yii\rest\UrlRule',
+					'controller' => [
+						'user',
+					],
+					'prefix' => 'api'
+				],
+			],
+		]
     ],
     'params' => $params,
 ];
